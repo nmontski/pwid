@@ -124,125 +124,167 @@ non-profit: held by non-profit institutions
 => "private" is probably "personal + non-profit"
 */
 
-const dataDefs = [
-  // { field: "year", code: null },
-  { field: "gdp", code: "mgdproi999" },
-  { field: "netTotalWealth", code: null, formula: "netPublicWealth + netPrivateWealth" },
-  { field: "netPublicWealth", code: "mgweali999" },
-  { field: "netPrivateWealth", code: "mpweali999" },
-  { field: "netResidualWealth", code: "mcwresi999" },
-  { field: "netPersonalWealth", code: "mhweali999" },
-  { field: "netNonProfitWealth", code: "miweali999" },
-  { field: "netMarketValueWealth", code: "mnweali999" },
-  { field: "netBookValueWealth", code: "mnwbooi999" },
-  { field: "netNationalIncome", code: "mnninci999" },
-  { field: "netGovernmentPrimaryIncome", code: "mprigoi999" },
-  { field: "netLaborPrimaryIncome", code: "mprihni999" },
-  { field: "netCorporatePrimaryIncome", code: "mpricoi999" },
-  { field: "netNonFinancialPrimaryIncome", code: "mprinfi999" },
-  { field: "netFinancialPrimaryIncome", code: "mprifci999" },
-  { field: "netCorporateSecondaryIncome", code: "mseccoi999" },
-  { field: "netDomesticProduct", code: "mndproi999" },
-  { field: "netForeignIncome", code: "mnnfini999" },
-  { field: "netSalaries", code: "mcomhni999" },
-  { field: "netCapitalIncome", code: "mfkpini999" },
-  { field: "netMixedIncome", code: "mnmxhoi999" },
-  { field: "netTaxesOnProd", code: "mptxgoi999" },
-  { field: "priceIndex", code: "inyixxi999" },
-  { field: "inflation", formula: "priceIndex / priceIndex-1 - 1", format: "0.00%" },
-  { field: "population", code: "npopuli999", format: "#,###" },
-  { field: "populationOver20", code: "npopuli992", format: "#,###" },
-  { field: "populationUpTo20", code: null, formula: "population - populationOver20", format: "#,###" },
-  { field: "capitalRevenue", code: null, formula: "0.3 * netMixedIncome + netCapitalIncome" },
-  { field: "capitalRevenuePercentage", code: null, formula: "capitalRevenue / netMarketValueWealth", format: "0.00%" },
-  { field: "gdpGrowth", code: null, formula: "gdp / gdp-1 - 1", format: "0.00%" },
-  { field: "nationalIncomeGrowth", code: null, formula: "netNationalIncome / netNationalIncome-1 - 1", format: "0.00%" },
-  { field: "overduePercentage", code: null, formula: "capitalRevenuePercentage - gdpGrowth", format: "0.00%" },
-  { field: "ddEnvelope", code: null, formula: "netMarketValueWealth * overduePercentage" },
-  { field: "monthlyDd", code: null, formula: "ddEnvelope * 1000000000 / population / 12" },
-]
+const dataDefs = makeDateDefs()
+const dataDefsObj = {}
+dataDefs.forEach((dataDef, index) => dataDefsObj[dataDef.field] = dataDef)
+
+function makeDateDefs() {
+  const defs = [
+    // { field: "year", code: null },
+    { field: "gdp", code: "mgdproi999" },
+    // { field: "gini", code: "gcaincj992" },
+    { field: "netTotalWealth", code: null, formula: "netPublicWealth + netPrivateWealth" },
+    { field: "netPublicWealth", code: "mgweali999" },
+    { field: "netPrivateWealth", code: "mpweali999" },
+    { field: "netResidualWealth", code: "mcwresi999" },
+    { field: "netPersonalWealth", code: "mhweali999" },
+    { field: "netNonProfitWealth", code: "miweali999" },
+    { field: "netMarketValueWealth", code: "mnweali999" },
+    { field: "netBookValueWealth", code: "mnwbooi999" },
+    { field: "netNationalIncome", code: "mnninci999" },
+    { field: "netGovernmentPrimaryIncome", code: "mprigoi999" },
+    { field: "netLaborPrimaryIncome", code: "mprihni999" },
+    { field: "netCorporatePrimaryIncome", code: "mpricoi999" },
+    { field: "netNonFinancialPrimaryIncome", code: "mprinfi999" },
+    { field: "netFinancialPrimaryIncome", code: "mprifci999" },
+    { field: "netCorporateSecondaryIncome", code: "mseccoi999" },
+    { field: "netDomesticProduct", code: "mndproi999" },
+    { field: "netForeignIncome", code: "mnnfini999" },
+    { field: "netSalaries", code: "mcomhni999" },
+    { field: "netCapitalIncome", code: "mfkpini999" },
+    { field: "netMixedIncome", code: "mnmxhoi999" },
+    { field: "netTaxesOnProd", code: "mptxgoi999" },
+    { field: "priceIndex", code: "inyixxi999" },
+    { field: "inflation", formula: "priceIndex / priceIndex-1 - 1", format: "0.00%" },
+    { field: "population", code: "npopuli999", format: "#,###" },
+    { field: "populationOver20", code: "npopuli992", format: "#,###" },
+    { field: "populationUpTo20", code: null, formula: "population - populationOver20", format: "#,###" },
+    { field: "capitalRevenue", code: null, formula: "0.3 * netMixedIncome + netCapitalIncome" },
+    { field: "capitalRevenuePercentage", code: null, formula: "capitalRevenue / netMarketValueWealth", format: "0.00%" },
+    { field: "gdpGrowth", code: null, formula: "gdp / gdp-1 - 1", format: "0.00%" },
+    { field: "nationalIncomeGrowth", code: null, formula: "netNationalIncome / netNationalIncome-1 - 1", format: "0.00%" },
+    { field: "overduePercentage", code: null, formula: "capitalRevenuePercentage - gdpGrowth", format: "0.00%", start: 1996 },
+    { field: "ddEnvelope", code: null, formula: "netMarketValueWealth * overduePercentage", start: 1996 },
+    { field: "monthlyDd", code: null, formula: "ddEnvelope * 1000000000 / population / 12", start: 1996 },
+    { field: "spreadedMonthlyDd", code: null, formula: "spread(monthlyDd, 5)", start: 1996 },
+    { field: "halfYearlyDd", code: null, formula: "spreadedMonthlyDd / 2 * 12", start: 1996 },
+    { field: "youthFunds", code: null, formula: "halfYearlyDd * populationUpTo20 / 1000000000", start: 1996 },
+  ]
+  for (let y = 1996; y < 2024 - 21; y++) {
+    const savingsPerYouth = "savingsPerYouth" + y
+    const savingsPerYouthCapitalized = "savingsPerYouthCapitalized" + y
+    const halfYearlyDdInterest = "halfYearlyDdInterest" + y
+    defs.push({ field: savingsPerYouth, code: null, formula: `halfYearlyDd + ${savingsPerYouth}-1`, start: y, end: y + 20 })
+    defs.push({ field: savingsPerYouthCapitalized, code: null, formula: `halfYearlyDd + ${halfYearlyDdInterest}-1 + ${savingsPerYouthCapitalized}-1`, start: y, end: y + 20 })
+    defs.push({ field: halfYearlyDdInterest, code: null, formula: `${savingsPerYouthCapitalized} * capitalRevenuePercentage`, start: y, end: y + 20 })
+  }
+  // console.log(defs)
+  return defs
+}
   
 async function makeNetCountryWealthCsv(country) {
-  
-  const dataDefsObj = {}
-  dataDefs.forEach((dataDef, index) => dataDefsObj[dataDef.field] = dataDef)
   
   dataDefs.forEach((dataDef, index) => {
     dataDef.lineNumber = index + 2
     if (dataDef.formula) {
-      const tokens = dataDef.formula.split(" ") 
-      
-      // this converts formula of a line to Excel formula based on cell ref
-      dataDef.getExcelFormula = columnName => {
-        const excelFormulaItems = []
-        for (let token of tokens) {
-          if (token.endsWith("-1")) {
-            if (columnName === "C") return undefined
-            token = token.substring(0, token.length - 2)
-            const columnNumber = xlsx.utils.decode_col(columnName)
-            const minusOneColumn = xlsx.utils.encode_col(columnNumber - 1)
-            // if (columnName === "AA") console.log(columnName, columnNumber, minusOneColumn)
-            excelFormulaItems.push(minusOneColumn + dataDefsObj[token].lineNumber)
-          } else if (dataDefsObj[token]) {
-            excelFormulaItems.push(columnName + dataDefsObj[token].lineNumber)
+      if (dataDef.formula.startsWith("spread(")) {
+        dataDef.generateExcelFormula = columnName => {
+          const params = dataDef.formula.substring("spread(".length, dataDef.formula.length - 1)
+          const [symbol, strOffset] = params.split(",").map(it => it?.trim())
+          let offset = parseInt(strOffset)
+          if (!symbol || !offset) {
+            throw Error(`Invalid formula ${dataDef.formula}`)
+          }
+          const columnNumber = xlsx.utils.decode_col(columnName)
+          // console.log("hhh", symbol, offset, columnNumber)
+          const maxAcceptableOffset = columnNumber - 2 + 1 // 2 comes from the fact we have 2 columns "name" and "code" at the beginning
+          offset = Math.min(offset, maxAcceptableOffset)
+          const excelFormulaItems = []
+          for (let i = offset - 1; i >= 0; i--) {
+            const minusXColumn = xlsx.utils.encode_col(columnNumber - i)
+            excelFormulaItems.push(minusXColumn + dataDefsObj[symbol].lineNumber)
+          }
+          if (offset === 1) {
+            return "=" + excelFormulaItems[0]
           } else {
-            excelFormulaItems.push(token)
+            return "=(" + excelFormulaItems.join("+") + ")/" + offset
           }
         }
-        return "=" + excelFormulaItems.join("")
-      }
-      
-      // this executes a formula for one cell
-      dataDef.executeFormula = (yearsObj, columnIndex) => {
-        const stack = []
-        for (let token of tokens) {
-          let isMinusOne = false
-          if (token.endsWith("-1")) {
-            if (columnIndex === 0) return undefined
-            token = token.substring(0, token.length - 2)
-            isMinusOne = true
-          }
-          let value
-          let isValue = false
-          if (dataDefsObj[token]) {
-            // console.log(columnIndex, yearsObj)
-            value = yearsObj[isMinusOne ? columnIndex - 1 : columnIndex][token]?.v
-            isValue = true
-          } else {
-            value = parseFloat(token)
-            isValue = !isNaN(value)
-          }
-          if (isValue) {
-            if (typeof stack.at(-1) === "function") {
-              // console.log(stack, value)
-              const func = stack.pop()
-              const a = stack.pop()
-              let value2 = func(a, value)
-              // console.log("=>", value2)
-              stack.push(value2)
+        dataDef.executeFormula = (yearsObj, columnIndex) => undefined
+      } else {
+        const tokens = dataDef.formula.split(" ") 
+        
+        // this converts formula of a line to Excel formula based on cell ref
+        dataDef.generateExcelFormula = columnName => {
+          const excelFormulaItems = []
+          for (let [index, token] of tokens.entries()) {
+            if (token.endsWith("-1")) {
+              if (columnName === "C" && tokens[index - 1] !== "+") return undefined
+              token = token.substring(0, token.length - 2)
+              const columnNumber = xlsx.utils.decode_col(columnName)
+              const minusOneColumn = xlsx.utils.encode_col(columnNumber - 1)
+              // if (columnName === "AA") console.log(columnName, columnNumber, minusOneColumn)
+              excelFormulaItems.push(minusOneColumn + dataDefsObj[token].lineNumber)
+            } else if (dataDefsObj[token]) {
+              excelFormulaItems.push(columnName + dataDefsObj[token].lineNumber)
             } else {
-              stack.push(value)
+              excelFormulaItems.push(token)
             }
-          } else {
-            let func = {
-              "+": (a, b) => a + b,
-              "-": (a, b) => { /*console.log("---", a, b);*/ return a - b },
-              "*": (a, b) => a * b,
-              "/": (a, b) => a / b,
-            }[token]
-            if (!func) throw Error("Invalid operation " + token) 
-            stack.push(func)
           }
+          return "=" + excelFormulaItems.join("")
         }
-        // console.log(dataDef.field, columnIndex, stack[0])
-        return stack[0]
-      }
-      
+        
+        // this executes a formula for one cell
+        dataDef.executeFormula = (yearsObj, columnIndex) => {
+          const stack = []
+          for (let token of tokens) {
+            let isMinusOne = false
+            if (token.endsWith("-1")) {
+              if (columnIndex === 0) return undefined
+              token = token.substring(0, token.length - 2)
+              isMinusOne = true
+            }
+            let value
+            let isValue = false
+            if (dataDefsObj[token]) {
+              // console.log(columnIndex, yearsObj)
+              value = yearsObj[isMinusOne ? columnIndex - 1 : columnIndex][token]?.v
+              isValue = true
+            } else {
+              value = parseFloat(token)
+              isValue = !isNaN(value)
+            }
+            if (isValue) {
+              if (typeof stack.at(-1) === "function") {
+                // console.log(stack, value)
+                const func = stack.pop()
+                const a = stack.pop()
+                let value2 = func(a, value)
+                // console.log("=>", value2)
+                stack.push(value2)
+              } else {
+                stack.push(value)
+              }
+            } else {
+              let func = {
+                "+": (a, b) => a + b,
+                "-": (a, b) => { /*console.log("---", a, b);*/ return a - b },
+                "*": (a, b) => a * b,
+                "/": (a, b) => a / b,
+              }[token]
+              if (!func) throw Error("Invalid operation " + token) 
+              stack.push(func)
+            }
+          }
+          // console.log(dataDef.field, columnIndex, stack[0])
+          return stack[0]
+        }
+      }      
     }
   })
   
-  // console.log(dataDefsObj["MonthlyDd"].getExcelFormula("E"))
-  // console.log(dataDefsObj["gdpGrowth"].getExcelFormula("ZZ"))
+  // console.log(dataDefsObj["MonthlyDd"].generateExcelFormula("E"))
+  // console.log(dataDefsObj["gdpGrowth"].generateExcelFormula("ZZ"))
   // for (let i = 0; i < 28; i++) {
     // console.log("----", i, "=>", getExcelcolumnName(i))
   // }
@@ -351,19 +393,21 @@ async function makeNetCountryWealthCsv(country) {
         // }
       // }
     // }
-    for (let { field, code, getExcelFormula, executeFormula, format } of dataDefs) {
-        // console.log("field", field, getExcelFormula)
-      if (getExcelFormula) {
-        const columnIndex = parseInt(y) - startYear
-        const columnName = xlsx.utils.encode_col(2 + columnIndex)
-        // console.log("columnName", y, 2 + columnIndex, columnName)
-        const f = getExcelFormula(columnName)
-        const v = executeFormula(years, columnIndex)
-        year[field] = { f, v, t: "n", z: format || "0.00" }
-      } else {
-        year[field] = { v: year[field]?.v, t: "n", z: format || "0.00" }
-      }
-      
+    for (let { field, code, generateExcelFormula, executeFormula, format, start, end } of dataDefs) {
+      // if (start) console.log(start, end, startYear + index, (!start || start <= startYear + index) && (!end || startYear + index < end))
+      if ((!start || start <= startYear + index) && (!end || startYear + index < end)) {
+          // console.log("field", field, generateExcelFormula)
+        if (generateExcelFormula) {
+          const columnIndex = parseInt(y) - startYear
+          const columnName = xlsx.utils.encode_col(2 + columnIndex)
+          // console.log("columnName", y, 2 + columnIndex, columnName)
+          const f = generateExcelFormula(columnName)
+          const v = executeFormula(years, columnIndex)
+          year[field] = { f, v, t: "n", z: format || "0.00" }
+        } else {
+          year[field] = { v: year[field]?.v, t: "n", z: format || "0.00" }
+        }
+      }      
     }
     prevY = y
   }
@@ -406,7 +450,7 @@ function yearsObjToXlsxData(yearsObj) {
   xlsxData.push(["name", "code", ...yearStrings])
   for (let { field, code } of dataDefs) {
     xlsxData.push([field, code, ...yearStrings.map(y => {
-      const cell = yearsObj[y][field]
+      const cell = yearsObj[y][field] || {}
       if (cell.f) {
         const cell2 = { ...cell }
         delete cell2.v
@@ -419,9 +463,31 @@ function yearsObjToXlsxData(yearsObj) {
   return xlsxData
 }
 
+function addFirstTab(workbook) {
+  const lines = [[undefined, ...countries.map(({ code }) => code)]]
+  {
+    const row = dataDefsObj["monthlyDd"].lineNumber
+    lines.push(["averageMonthlyDd", ...countries.map(({ code }) => ({ f: `=AVERAGE(${code}!C${row}:AF${row})`, z: "0.00" }))])
+  }
+  {
+    const row = dataDefsObj["overduePercentage"].lineNumber
+    lines.push(["averageOverduePercentage", ...countries.map(({ code }) => ({ f: `=AVERAGE(${code}!C${row}:AF${row})`, z: "0.00%" }))])
+  }
+  for (let y = 1996; y < 2024 - 21; y++) {
+    const savingsPerYouthCapitalized = "savingsPerYouthCapitalized" + y
+    const rowName = dataDefsObj[savingsPerYouthCapitalized].lineNumber
+    const columnNumber = 1 + y - 1995 + 20
+    const columnName = xlsx.utils.encode_col(columnNumber)
+    lines.push([savingsPerYouthCapitalized, ...countries.map(({ code }) => ({ f: `=${code}!${columnName}${rowName}`, z: "0.00" }))])
+  }  
+  const worksheet = xlsx.utils.aoa_to_sheet(lines, { cellDates: true })
+  xlsx.utils.book_append_sheet(workbook, worksheet, "Summary")
+}
+
 async function saveExcel(countryDataObj) {
   
   const workbook = xlsx.utils.book_new()
+  addFirstTab(workbook)
   for (let country in countryDataObj) {
     const xlsxData = yearsObjToXlsxData(countryDataObj[country])
   
