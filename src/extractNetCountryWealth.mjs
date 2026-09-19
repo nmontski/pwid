@@ -43,6 +43,14 @@ prico	        (+) net primary income of corporations	                  B5n	S11 +
 nmxho	    (+) net mixed income of households	                          B3n	S14
 ptxgo	    (+) taxes on products and production	                        D2 – D3	S13
 
+----------------------------------------------------
+
+code	      Description
+wcsnnii999  alpha = Capital share of total national income at factor-price
+wpweali999  beta = "Net private wealth" (patrimoine privé net rapporté au revenu national)
+
+r = wcsnnii999 / wpweali999
+
 */
 
 import { MongoClient } from "mongodb"
@@ -50,6 +58,8 @@ import { MongoClient } from "mongodb"
 import fs from "fs";
 import xlsx from "xlsx";
 import { parse, transform, stringify } from "csv";
+
+const startYear = 1980
 
 const euroCountries = [
   { name: "Austria", code: "AT" },
@@ -131,6 +141,9 @@ dataDefs.forEach((dataDef, index) => dataDefsObj[dataDef.field] = dataDef)
 function makeDateDefs() {
   const defs = [
     // { field: "year", code: null },
+    { field: "alpha", code: "wcsnnii999" },
+    { field: "beta", code: "wpweali999" },
+    { field: "r", code: null, formula: "alpha / beta", format: "0.00%" /*, start: 1996 */ },
     { field: "gdp", code: "mgdproi999" },
     // { field: "gini", code: "gcaincj992" },
     { field: "netTotalWealth", code: null, formula: "netPublicWealth + netPrivateWealth" },
@@ -163,14 +176,16 @@ function makeDateDefs() {
     { field: "capitalRevenuePercentage", code: null, formula: "capitalRevenue / netMarketValueWealth", format: "0.00%" },
     { field: "gdpGrowth", code: null, formula: "gdp / gdp-1 - 1", format: "0.00%" },
     { field: "nationalIncomeGrowth", code: null, formula: "netNationalIncome / netNationalIncome-1 - 1", format: "0.00%" },
-    { field: "overduePercentage", code: null, formula: "capitalRevenuePercentage - gdpGrowth", format: "0.00%", start: 1996 },
-    { field: "ddEnvelope", code: null, formula: "netMarketValueWealth * overduePercentage", start: 1996 },
-    { field: "monthlyDd", code: null, formula: "ddEnvelope * 1000000000 / population / 12", start: 1996 },
-    { field: "spreadedMonthlyDd", code: null, formula: "spread(monthlyDd, 5)", start: 1996 },
-    { field: "halfYearlyDd", code: null, formula: "spreadedMonthlyDd / 2 * 12", start: 1996 },
-    { field: "youthFunds", code: null, formula: "halfYearlyDd * populationUpTo20 / 1000000000", start: 1996 },
+    { field: "overduePercentageOld", code: null, formula: "capitalRevenuePercentage - gdpGrowth", format: "0.00%", start: startYear + 1 },
+    { field: "overduePercentage", code: null, formula: "r - nationalIncomeGrowth", format: "0.00%", start: startYear + 1 },
+    { field: "ddEnvelopeOld", code: null, formula: "netMarketValueWealth * overduePercentage", start: startYear + 1 },
+    { field: "ddEnvelope", code: null, formula: "netPrivateWealth * overduePercentage", start: startYear + 1 },
+    { field: "monthlyDd", code: null, formula: "ddEnvelope * 1000000000 / population / 12", start: startYear + 1 },
+    { field: "spreadedMonthlyDd", code: null, formula: "spread(monthlyDd, 5)", start: startYear + 1 },
+    { field: "halfYearlyDd", code: null, formula: "spreadedMonthlyDd / 2 * 12", start: startYear + 1 },
+    { field: "youthFunds", code: null, formula: "halfYearlyDd * populationUpTo20 / 1000000000", start: startYear + 1 },
   ]
-  for (let y = 1996; y < 2024 - 21; y++) {
+  for (let y = startYear + 2; y < 2024 - 21; y++) {
     const savingsPerYouth = "savingsPerYouth" + y
     const savingsPerYouthCapitalized = "savingsPerYouthCapitalized" + y
     const halfYearlyDdInterest = "halfYearlyDdInterest" + y
@@ -289,8 +304,6 @@ async function makeNetCountryWealthCsv(country) {
     // console.log("----", i, "=>", getExcelcolumnName(i))
   // }
   // return
-  
-  const startYear = 1995
   
   // get data from Mongo
   const collectionData = {}
@@ -415,7 +428,7 @@ async function makeNetCountryWealthCsv(country) {
   // check average
   let sum = 0
   let n = 0
-  for (let y = 1996; y < 2023; y++) {
+  for (let y = startYear; y < 2023; y++) {
     const columnIndex = y - startYear
     sum += yearsObj[yearStrings[columnIndex]].monthlyDd?.v || 0
   // console.log("hhh", yearStrings[columnIndex], yearsObj[yearStrings[columnIndex]].monthlyDd?.v) 
@@ -473,10 +486,10 @@ function addFirstTab(workbook) {
     const row = dataDefsObj["overduePercentage"].lineNumber
     lines.push(["averageOverduePercentage", ...countries.map(({ code }) => ({ f: `=AVERAGE(${code}!C${row}:AF${row})`, z: "0.00%" }))])
   }
-  for (let y = 1996; y < 2024 - 21; y++) {
+  for (let y = startYear + 2; y < 2024 - 21; y++) {
     const savingsPerYouthCapitalized = "savingsPerYouthCapitalized" + y
     const rowName = dataDefsObj[savingsPerYouthCapitalized].lineNumber
-    const columnNumber = 1 + y - 1995 + 20
+    const columnNumber = 1 + y - startYear + 20
     const columnName = xlsx.utils.encode_col(columnNumber)
     lines.push([savingsPerYouthCapitalized, ...countries.map(({ code }) => ({ f: `=${code}!${columnName}${rowName}`, z: "0.00" }))])
   }  
